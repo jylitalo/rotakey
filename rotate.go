@@ -6,16 +6,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Execute rotates user's AWS credentials
+// Execute rotates user's AWS credentials in ~/.aws/credentials
 // Possible error messages are:
-// - LimitExceeded: Cannot exceed quota for AccessKeysPerUser: %d
+// - %s does not exist
+// - failed to check %s
 // - failed to create access key due to %v
+// - failed to delete access key due to %v
+// - failed to save %s due to %v
+// - no profile with %s access key id
+// - unable to find AWS profile due to AWS_SESSION_TOKEN
 // - InvalidClientTokenId at CreateAccessKey: The security token (%s) included in the request is invalid
 // - InvalidClientTokenId at DeleteAccessKey: The security token (%s) included in the request is invalid
-// ...
-// - failed to update access key (%s)
-// - no profile with %s access key id
-// - unable to find AWS profile due to SESSION_TOKEN
+// - LimitExceeded: Cannot exceed quota for AccessKeysPerUser: %d
 func Execute() error {
 	// setup
 	awsCfg, err := getConfig()
@@ -43,7 +45,8 @@ func Execute() error {
 	} else if err = fileCfg.save(profile, newKeys); err != nil {
 		return err
 	}
-	newAwsCfg, err := resetConfig(newKeys)
+	// verify
+	newAwsCfg, err := getConfig()
 	if err != nil {
 		return err
 	}
@@ -53,7 +56,6 @@ func Execute() error {
 	} else if idAtStart == updatedID {
 		return fmt.Errorf("failed to update access key (%s)", idAtStart)
 	}
-	log.Debug("new access key ID is " + updatedID)
-	newIAM := newIAM(newAwsCfg)
-	return newIAM.deleteAccessKey(idAtStart)
+	log.Debug("new AWS access key ID is " + updatedID)
+	return iam.deleteAccessKey(idAtStart)
 }
