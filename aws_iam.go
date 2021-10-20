@@ -8,8 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type awsIAM struct {
@@ -37,23 +35,13 @@ func (client *awsIAM) createAccessKey() (*types.AccessKey, error) {
 }
 
 func (client *awsIAM) deleteAccessKey(accessKeyId string) error {
-	username, err := getUsername(client.cfg)
-	if err != nil {
-		return err
-	}
-	input := iam.DeleteAccessKeyInput{
-		AccessKeyId: &accessKeyId,
-		UserName:    &username,
-	}
-	log.Debugf("deleteAccessKeys input: %#v", input)
-	_, err = client.sdk.DeleteAccessKey(context.TODO(), &input)
-	if err != nil {
-		log.Debugf("err=%s", err.Error())
-	}
+	_, err := client.sdk.DeleteAccessKey(context.TODO(), &iam.DeleteAccessKeyInput{AccessKeyId: &accessKeyId})
 	switch {
+	case err == nil:
+		return err
 	case strings.Contains(err.Error(), "InvalidClientTokenId: The security token included in the request is invalid"):
 		return fmt.Errorf("InvalidClientTokenId at DeleteAccessKey: The security token (%s) included in the request is invalid", accessKeyId)
 	default:
-		return err
+		return fmt.Errorf("failed to delete access key due to %v", err)
 	}
 }
