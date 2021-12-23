@@ -5,21 +5,19 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-type awsIAM struct {
+type awsIamIface interface {
+	createAccessKey() (*types.AccessKey, error)
+	deleteAccessKey(accessKeyId string) error
+}
+type awsIam struct {
 	sdk *iam.Client
-	cfg aws.Config
 }
 
-func newIAM(cfg aws.Config) *awsIAM {
-	return &awsIAM{sdk: iam.NewFromConfig(cfg), cfg: cfg}
-}
-
-func (client *awsIAM) createAccessKey() (*types.AccessKey, error) {
+func (client awsIam) createAccessKey() (*types.AccessKey, error) {
 	resp, err := client.sdk.CreateAccessKey(context.TODO(), nil)
 	switch {
 	case err == nil:
@@ -34,7 +32,7 @@ func (client *awsIAM) createAccessKey() (*types.AccessKey, error) {
 	}
 }
 
-func (client *awsIAM) deleteAccessKey(accessKeyId string) error {
+func (client awsIam) deleteAccessKey(accessKeyId string) error {
 	_, err := client.sdk.DeleteAccessKey(context.TODO(), &iam.DeleteAccessKeyInput{AccessKeyId: &accessKeyId})
 	switch {
 	case err == nil:

@@ -18,44 +18,44 @@ import (
 // - InvalidClientTokenId at CreateAccessKey: The security token (%s) included in the request is invalid
 // - InvalidClientTokenId at DeleteAccessKey: The security token (%s) included in the request is invalid
 // - LimitExceeded: Cannot exceed quota for AccessKeysPerUser: %d
-func Execute() error {
+func Execute(newAwsConfig func() (AwsConfigIface, error), newDotAws func() (DotAwsIface, error)) error {
 	// setup
-	awsCfg, err := getConfig()
-	if err != nil {
+	awsCfg, errA := newAwsConfig()
+	fileCfg, errB := newDotAws()
+	if err := CoalesceError(errA, errB); err != nil {
 		return err
 	}
-	idAtStart, err := getAccessKeyID(awsCfg)
-	if err != nil {
-		return err
-	}
-	fileCfg, err := NewDotAws()
-	if err != nil {
-		return err
-	}
+	idAtStart, errA := awsCfg.accessKeyID()
+	iam := awsCfg.newIam()
 	// validate
-	profile, err := fileCfg.getProfile(idAtStart)
-	if err != nil {
-		return err
-	}
+	profile, errB := fileCfg.getProfile(idAtStart)
+	log.Debugf("Found access key (%s) from %s profile", idAtStart, profile)
 	// execute
-	iam := newIAM(awsCfg)
-	newKeys, err := iam.createAccessKey()
-	if err != nil {
-		return err
-	} else if err = fileCfg.save(profile, newKeys); err != nil {
+	newKeys, errC := iam.createAccessKey()
+	if err := CoalesceError(errA, errB, errC); err != nil {
 		return err
 	}
-	// verify
-	newAwsCfg, err := getConfig()
-	if err != nil {
+	errA = fileCfg.save(profile, newKeys) // verify
+	newAwsCfg, errB := newAwsConfig()
+	if err := CoalesceError(errA, errB); err != nil {
 		return err
 	}
-	updatedID, err := getAccessKeyID(newAwsCfg)
+	updatedID, err := newAwsCfg.accessKeyID()
 	if err != nil {
 		return err
 	} else if idAtStart == updatedID {
 		return fmt.Errorf("failed to update access key (%s)", idAtStart)
 	}
-	log.Debug("new AWS access key ID is " + updatedID)
+	log.Infof("New access key created (id: %s)", *newKeys.AccessKeyId)
+	log.Infof("Deleted old access key (id: %s)", idAtStart)
 	return iam.deleteAccessKey(idAtStart)
+}
+
+func CoalesceError(errs ...error) error {
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
