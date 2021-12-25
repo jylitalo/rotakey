@@ -17,7 +17,7 @@ type awsConfig struct {
 	config aws.Config
 }
 
-func NewAwsConfig() (AwsConfigIface, error) {
+func newAwsConfig() (AwsConfigIface, error) {
 	var err error
 	cfg := awsConfig{}
 	cfg.config, err = config.LoadDefaultConfig(context.TODO())

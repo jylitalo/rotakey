@@ -33,7 +33,7 @@ func credentialsFile(fname string) (string, error) {
 	return fname, err
 }
 
-func NewDotAws() (DotAwsIface, error) {
+func newDotAws() (DotAwsIface, error) {
 	if fname, err := credentialsFile(config.DefaultSharedCredentialsFilename()); err != nil {
 		return nil, err
 	} else if iniFile, err := ini.Load(fname); err != nil {

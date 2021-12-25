@@ -6,6 +6,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type ExecuteInput struct {
+	NewAwsConfig func() (AwsConfigIface, error)
+	NewDotAws    func() (DotAwsIface, error)
+}
+
+type Exec struct{}
+
+type ExecIface interface {
+	Execute(ExecuteInput) error
+}
+
+func NewExec() ExecIface {
+	return Exec{}
+}
+
 // Execute rotates user's AWS credentials in ~/.aws/credentials
 // Possible error messages are:
 // - %s does not exist
@@ -18,10 +33,16 @@ import (
 // - InvalidClientTokenId at CreateAccessKey: The security token (%s) included in the request is invalid
 // - InvalidClientTokenId at DeleteAccessKey: The security token (%s) included in the request is invalid
 // - LimitExceeded: Cannot exceed quota for AccessKeysPerUser: %d
-func Execute(newAwsConfig func() (AwsConfigIface, error), newDotAws func() (DotAwsIface, error)) error {
+func (client Exec) Execute(params ExecuteInput) error {
 	// setup
-	awsCfg, errA := newAwsConfig()
-	fileCfg, errB := newDotAws()
+	if params.NewAwsConfig == nil {
+		params.NewAwsConfig = newAwsConfig
+	}
+	if params.NewDotAws == nil {
+		params.NewDotAws = newDotAws
+	}
+	awsCfg, errA := params.NewAwsConfig()
+	fileCfg, errB := params.NewDotAws()
 	if err := CoalesceError(errA, errB); err != nil {
 		return err
 	}
@@ -29,7 +50,7 @@ func Execute(newAwsConfig func() (AwsConfigIface, error), newDotAws func() (DotA
 	iam := awsCfg.newIam()
 	// validate
 	profile, errB := fileCfg.getProfile(idAtStart)
-	log.Debugf("Found access key (%s) from %s profile", idAtStart, profile)
+	log.Debugf("Found access key (%s) from %s profile", idAtStart, profile.Name())
 	// execute
 	newKeys, errC := iam.createAccessKey()
 	if err := CoalesceError(errA, errB, errC); err != nil {

@@ -9,7 +9,13 @@ import (
 	"github.com/jylitalo/rotakey"
 )
 
-func NewRotakeyCmd(newAwsConfig func() (rotakey.AwsConfigIface, error), newDotAws func() (rotakey.DotAwsIface, error)) *cobra.Command {
+type NewCmdInput struct {
+	NewExec      func() rotakey.ExecIface
+	NewAwsConfig func() (rotakey.AwsConfigIface, error)
+	NewDotAws    func() (rotakey.DotAwsIface, error)
+}
+
+func NewCmd(params NewCmdInput) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rotakey",
 		Short: "Rotate AWS IAM credentials",
@@ -18,6 +24,7 @@ func NewRotakeyCmd(newAwsConfig func() (rotakey.AwsConfigIface, error), newDotAw
 2. updating new access keys into ~/.aws/credentials
 3. remove current access keys from IAM
 `,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags := cmd.Flags()
 			debug, errD := flags.GetBool("debug")
@@ -33,7 +40,14 @@ func NewRotakeyCmd(newAwsConfig func() (rotakey.AwsConfigIface, error), newDotAw
 			default:
 				log.SetLevel(log.WarnLevel)
 			}
-			if err := rotakey.Execute(newAwsConfig, newDotAws); err != nil {
+			if params.NewExec == nil {
+				params.NewExec = rotakey.NewExec
+			}
+			err := params.NewExec().Execute(rotakey.ExecuteInput{
+				NewAwsConfig: params.NewAwsConfig,
+				NewDotAws:    params.NewDotAws,
+			})
+			if err != nil {
 				return err
 			}
 			fmt.Println("Task completed.")

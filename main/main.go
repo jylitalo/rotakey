@@ -3,14 +3,17 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/jylitalo/rotakey"
 	"github.com/jylitalo/rotakey/cmd"
 )
 
-func main() {
+func execute(params cmd.NewCmdInput) {
 	log.SetFormatter(&log.TextFormatter{
 		DisableLevelTruncation: true,
 		DisableTimestamp:       true,
 	})
-	cmd.NewRotakeyCmd(rotakey.NewAwsConfig, rotakey.NewDotAws).Execute()
+	cmd.NewCmd(params).Execute()
+
+}
+func main() {
+	execute(cmd.NewCmdInput{})
 }
