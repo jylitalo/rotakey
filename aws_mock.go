@@ -1,15 +1,17 @@
 package rotakey
 
-type awsConfigMock struct{}
+type awsConfigMock struct {
+	accessKey string
+}
 
 func newAwsConfigMock() (AwsConfigIface, error) {
-	return awsConfigMock{}, nil
+	return awsConfigMock{accessKey: "AKIABCDEFGHIJKLKMNOP"}, nil
 }
 
 func (client awsConfigMock) accessKeyID() (string, error) {
-	return "AKIABCDEFGHIJKLKMNOP", nil
+	return client.accessKey, nil
 }
 
 func (client awsConfigMock) newIam() awsIamIface {
-	return awsIamMock{}
+	return awsIamMock{callback: &client}
 }

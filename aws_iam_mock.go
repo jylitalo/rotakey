@@ -4,10 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-type awsIamMock struct{}
+type awsIamMock struct {
+	callback *awsConfigMock
+}
 
 func (client awsIamMock) createAccessKey() (*types.AccessKey, error) {
-	accessKeyId := "AKIABCDEFGHIJKLKMNOP"
+	accessKeyId, _ := client.callback.accessKeyID()
+	accessKeyId = accessKeyId[:len(accessKeyId)-2] + "Z"
 	secretAccessKey := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN"
 	return &types.AccessKey{
 		AccessKeyId:     &accessKeyId,
