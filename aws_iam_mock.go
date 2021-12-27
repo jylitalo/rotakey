@@ -13,7 +13,10 @@ type awsIamMock struct {
 
 func (client awsIamMock) createAccessKey() (*types.AccessKey, error) {
 	accessKeyId, _ := client.callback.accessKeyID()
-	if strings.HasSuffix(accessKeyId, "Z") {
+	if len(accessKeyId) < 2 {
+		return nil, fmt.Errorf("AccessKey (%s) is too short", accessKeyId)
+	}
+	if strings.HasSuffix(accessKeyId, "CreateERR") {
 		return nil, fmt.Errorf("error condition triggered")
 	}
 	accessKeyId = accessKeyId[:len(accessKeyId)-2] + "Z"

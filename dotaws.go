@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"golang.org/x/sys/unix"
 
 	log "github.com/sirupsen/logrus"
 	ini "gopkg.in/ini.v1"
@@ -18,13 +19,19 @@ type dotAws struct {
 
 type DotAwsIface interface {
 	getProfile(accessKeyId string) (*ini.Section, error)
-	save(profile *ini.Section, accessKey *types.AccessKey) error
+	save(profile *ini.Section, accessKey types.AccessKey) error
 }
 
 func credentialsFile(fname string) (string, error) {
 	_, err := os.Stat(fname)
 	switch {
 	case err == nil:
+		switch {
+		case unix.Access(fname, unix.R_OK) != nil:
+			err = fmt.Errorf("no read access to %s due to %v", fname, unix.Access(fname, unix.R_OK))
+		case unix.Access(fname, unix.W_OK) != nil:
+			err = fmt.Errorf("no write access to %s due to %v", fname, unix.Access(fname, unix.W_OK))
+		}
 	case os.IsNotExist(err):
 		err = fmt.Errorf("%s does not exist", fname)
 	default:
@@ -57,7 +64,7 @@ func (client dotAws) getProfile(accessKeyId string) (*ini.Section, error) {
 	return nil, fmt.Errorf("no profile with %s access key id", accessKeyId)
 }
 
-func (client dotAws) save(profile *ini.Section, accessKey *types.AccessKey) error {
+func (client dotAws) save(profile *ini.Section, accessKey types.AccessKey) error {
 	profile.Key("aws_access_key_id").SetValue(*accessKey.AccessKeyId)
 	profile.Key("aws_secret_access_key").SetValue(*accessKey.SecretAccessKey)
 	if err := client.iniFile.SaveTo(client.filename); err != nil {

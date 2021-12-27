@@ -22,6 +22,6 @@ func (client dotAwsMock) getProfile(accessKeyId string) (*ini.Section, error) {
 	return section, nil
 }
 
-func (client dotAwsMock) save(profile *ini.Section, accessKey *types.AccessKey) error {
+func (client dotAwsMock) save(profile *ini.Section, accessKey types.AccessKey) error {
 	return nil
 }

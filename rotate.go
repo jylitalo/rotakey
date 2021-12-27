@@ -50,13 +50,15 @@ func (client Exec) Execute(params ExecuteInput) error {
 	iam := awsCfg.newIam()
 	// validate
 	profile, errB := fileCfg.getProfile(idAtStart)
-	log.Debugf("Found access key (%s) from %s profile", idAtStart, profile.Name())
+	if profile != nil {
+		log.Debugf("Found access key (%s) from %s profile", idAtStart, profile.Name())
+	}
 	// execute
 	newKeys, errC := iam.createAccessKey()
 	if err := CoalesceError(errA, errB, errC); err != nil {
 		return err
 	}
-	errA = fileCfg.save(profile, newKeys) // verify
+	errA = fileCfg.save(profile, *newKeys) // verify
 	newAwsCfg, errB := newAwsConfig()
 	if err := CoalesceError(errA, errB); err != nil {
 		return err
