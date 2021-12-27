@@ -25,9 +25,12 @@ func TestCredentialsMissing(t *testing.T) {
 
 func TestCredentialsReadMissing(t *testing.T) {
 	fname := "TestCredentialsReadMissing"
-	os.Create(fname)
+	_, errA := os.Create(fname)
 	defer os.Remove(fname)
-	os.Chmod(fname, 0222)
+	errB := os.Chmod(fname, 0222)
+	if err := CoalesceError(errA, errB); err != nil {
+		t.Errorf("File setup failed due to %s", err.Error())
+	}
 	_, err := credentialsFile(fname)
 	if err == nil {
 		t.Error("TestCredentialsReadMissing failed to notice missing read permission")
@@ -40,9 +43,12 @@ func TestCredentialsReadMissing(t *testing.T) {
 
 func TestCredentialsWriteMissing(t *testing.T) {
 	fname := "TestCredentialsWriteMissing"
-	os.Create(fname)
+	_, errA := os.Create(fname)
 	defer os.Remove(fname)
-	os.Chmod(fname, 0444)
+	errB := os.Chmod(fname, 0444)
+	if err := CoalesceError(errA, errB); err != nil {
+		t.Errorf("File setup failed due to %s", err.Error())
+	}
 	_, err := credentialsFile(fname)
 	if err == nil {
 		t.Error("TestCredentialsWriteMissing failed to notice missing write permission")
