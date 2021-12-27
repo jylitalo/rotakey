@@ -1,0 +1,39 @@
+name: build golang
+on: [push]
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache paths
+      uses: actions/cache@v2
+      with:
+        path: ~/go
+        key: ${{ hashFiles('go.sum') }}
+
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.17'
+
+    - name: Run tests
+      run: go test ./... -v
+
+    - name: Run test coverage
+      run: go test ./... -cover
+
+    - name: Set version number
+      run: |
+        VERSION_NUMBER=$([ "GITHUB_REF_NAME" == "master" ] && echo "1.0.${GITHUB_RUN_NUMBER}" || echo "0.1.${GITHUB_RUN_NUMBER}-${GITHUB_REF_NAME//\//-}")
+        echo "VERSION_NUMBER=$VERSION_NUMBER" >> $GITHUB_ENV
+
+    - name: Compile binary and deploy
+      run: go build -o rotakey main/main.go
+
+    - name: Tag git repository
+      run: |
+        git config --global user.email "jylitalo@users.noreply.github.com"
+        git config --global user.name "GitHub Actions"
+        git tag "${VERSION_NUMBER}" -a -m "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+        git push origin "${VERSION_NUMBER}"
