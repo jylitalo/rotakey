@@ -44,7 +44,7 @@ func (client Exec) Execute(params ExecuteInput) error {
 	awsCfg, errA := params.NewAwsConfig()
 	fileCfg, errB := params.NewDotAws()
 	if err := CoalesceError(errA, errB); err != nil {
-		return err
+		return fmt.Errorf("constructors in execute failed due to %s", err.Error())
 	}
 	idAtStart, errA := awsCfg.accessKeyID()
 	iam := awsCfg.newIam()
@@ -59,13 +59,13 @@ func (client Exec) Execute(params ExecuteInput) error {
 		return err
 	}
 	errA = fileCfg.save(profile, *newKeys) // verify
-	newAwsCfg, errB := newAwsConfig()
+	newAwsCfg, errB := params.NewAwsConfig()
 	if err := CoalesceError(errA, errB); err != nil {
-		return err
+		return fmt.Errorf("changes in execute failed due to %s", err.Error())
 	}
 	updatedID, err := newAwsCfg.accessKeyID()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get new access key (%s) due to %s", *newKeys.AccessKeyId, err.Error())
 	} else if idAtStart == updatedID {
 		return fmt.Errorf("failed to update access key (%s)", idAtStart)
 	}

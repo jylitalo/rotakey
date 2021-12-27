@@ -12,7 +12,7 @@ type awsIamMock struct {
 }
 
 func (client awsIamMock) createAccessKey() (*types.AccessKey, error) {
-	accessKeyId, _ := client.callback.accessKeyID()
+	accessKeyId := awsConfigMockAccessKey
 	if len(accessKeyId) < 2 {
 		return nil, fmt.Errorf("AccessKey (%s) is too short", accessKeyId)
 	}
@@ -21,6 +21,7 @@ func (client awsIamMock) createAccessKey() (*types.AccessKey, error) {
 	}
 	accessKeyId = accessKeyId[:len(accessKeyId)-2] + "Z"
 	secretAccessKey := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN"
+	awsConfigMockAccessKey = accessKeyId
 	return &types.AccessKey{
 		AccessKeyId:     &accessKeyId,
 		SecretAccessKey: &secretAccessKey,

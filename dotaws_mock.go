@@ -16,10 +16,10 @@ func (client dotAwsMock) getProfile(accessKeyId string) (*ini.Section, error) {
 	accessKeyID := "AKIABCDEFGHIJKLKMNOZ"
 	secretAccessKey := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMZ"
 	file := ini.Empty()
-	section, _ := file.NewSection("mock")
-	section.NewKey("aws_access_key_id", accessKeyID)
-	section.NewKey("aws_secret_access_key", secretAccessKey)
-	return section, nil
+	section, errA := file.NewSection("mock")
+	_, errB := section.NewKey("aws_access_key_id", accessKeyID)
+	_, errC := section.NewKey("aws_secret_access_key", secretAccessKey)
+	return section, CoalesceError(errA, errB, errC)
 }
 
 func (client dotAwsMock) save(profile *ini.Section, accessKey types.AccessKey) error {
