@@ -70,5 +70,6 @@ func (client dotAws) save(profile *ini.Section, accessKey types.AccessKey) error
 	if err := client.iniFile.SaveTo(client.filename); err != nil {
 		return fmt.Errorf("failed to save %s due to %v", client.filename, err.Error())
 	}
+	log.Debug("Updated config saved into " + client.filename)
 	return nil
 }

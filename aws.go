@@ -19,16 +19,16 @@ type awsConfig struct {
 
 func newAwsConfig() (AwsConfigIface, error) {
 	var err error
-	cfg := awsConfig{}
+	cfg := &awsConfig{}
 	cfg.config, err = config.LoadDefaultConfig(context.TODO())
 	return cfg, err
 }
 
-func (client awsConfig) accessKeyID() (string, error) {
+func (client *awsConfig) accessKeyID() (string, error) {
 	creds, err := client.config.Credentials.Retrieve(context.TODO())
 	return creds.AccessKeyID, err
 }
 
-func (client awsConfig) newIam() awsIamIface {
-	return awsIam{sdk: iam.NewFromConfig(client.config)}
+func (client *awsConfig) newIam() awsIamIface {
+	return &awsIam{sdk: iam.NewFromConfig(client.config)}
 }

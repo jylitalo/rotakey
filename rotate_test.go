@@ -23,6 +23,20 @@ func TestExecute(t *testing.T) {
 	}
 }
 
+func newAwsConfigMockWithOneFailure() (AwsConfigIface, error) {
+	mock := &awsConfigMock{}
+	mock.failCreateAccessKey = 1
+	return mock, nil
+}
+
+func TestExecuteWithOneFailure(t *testing.T) {
+	awsConfigMockAccessKey = "AKIABCDEFGHIJKLKMNOP"
+	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMockWithOneFailure, NewDotAws: newDotAwsMock})
+	if err != nil {
+		t.Errorf("ExecuteWithOneFailure failed due to %v", err)
+	}
+}
+
 func TestAwsConfigMissing(t *testing.T) {
 	awsConfigMockAccessKey = ""
 	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMock, NewDotAws: newDotAws})

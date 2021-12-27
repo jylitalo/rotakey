@@ -8,16 +8,20 @@ import (
 )
 
 type awsIamMock struct {
-	callback *awsConfigMock
+	failCreateAccessKey *int
 }
 
-func (client awsIamMock) createAccessKey() (*types.AccessKey, error) {
+func (client *awsIamMock) createAccessKey() (*types.AccessKey, error) {
 	accessKeyId := awsConfigMockAccessKey
 	if len(accessKeyId) < 2 {
 		return nil, fmt.Errorf("AccessKey (%s) is too short", accessKeyId)
 	}
 	if strings.HasSuffix(accessKeyId, "CreateERR") {
 		return nil, fmt.Errorf("error condition triggered")
+	}
+	if *client.failCreateAccessKey > 0 {
+		*client.failCreateAccessKey--
+		return nil, fmt.Errorf("InvalidClientTokenId at CreateAccessKey: The security token included in the request is invalid")
 	}
 	accessKeyId = accessKeyId[:len(accessKeyId)-2] + "Z"
 	secretAccessKey := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN"
@@ -28,6 +32,6 @@ func (client awsIamMock) createAccessKey() (*types.AccessKey, error) {
 	}, nil
 }
 
-func (client awsIamMock) deleteAccessKey(accessKeyId string) error {
+func (client *awsIamMock) deleteAccessKey(accessKeyId string) error {
 	return nil
 }
