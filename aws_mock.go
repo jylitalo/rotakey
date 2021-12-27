@@ -1,20 +1,15 @@
 package rotakey
 
-import "fmt"
+var awsConfigMockAccessKey = "AKIABCDEFGHIJKLKMNOP"
 
-type awsConfigMock struct {
-	accessKey string
-}
+type awsConfigMock struct{}
 
 func newAwsConfigMock() (AwsConfigIface, error) {
-	return awsConfigMock{accessKey: "AKIABCDEFGHIJKLKMNOP"}, nil
+	return awsConfigMock{}, nil
 }
 
 func (client awsConfigMock) accessKeyID() (string, error) {
-	if client.accessKey == "" {
-		return "", fmt.Errorf("no AWS access key")
-	}
-	return client.accessKey, nil
+	return awsConfigMockAccessKey, nil
 }
 
 func (client awsConfigMock) newIam() awsIamIface {
