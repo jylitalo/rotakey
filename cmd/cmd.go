@@ -10,14 +10,18 @@ import (
 )
 
 type NewCmdInput struct {
+	Use          string
 	NewExec      func() rotakey.ExecIface
 	NewAwsConfig func() (rotakey.AwsConfigIface, error)
 	NewDotAws    func() (rotakey.DotAwsIface, error)
 }
 
 func NewCmd(params NewCmdInput) *cobra.Command {
+	if params.Use == "" {
+		params.Use = "rotakey"
+	}
 	cmd := &cobra.Command{
-		Use:   "rotakey",
+		Use:   params.Use,
 		Short: "Rotate AWS IAM credentials",
 		Long: `Rotate AWS IAM credentials by
 1. creating new access keys into IAM
