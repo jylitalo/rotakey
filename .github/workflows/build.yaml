@@ -25,8 +25,8 @@ jobs:
 
     - name: Set version number
       run: |
-        VERSION_NUMBER=$([ "GITHUB_REF_NAME" == "main" ] && echo "1.0.${GITHUB_RUN_NUMBER}" || echo "0.1.${GITHUB_RUN_NUMBER}-${GITHUB_REF_NAME//\//-}")
-        echo "VERSION_NUMBER=$VERSION_NUMBER" >> $GITHUB_ENV
+        VERSION_NUMBER=$([ "$GITHUB_REF_NAME" == "main" ] && echo "1.0.${GITHUB_RUN_NUMBER}" || echo "0.1.${GITHUB_RUN_NUMBER}-${GITHUB_REF_NAME//\//-}")
+        echo "VERSION_NUMBER=$VERSION_NUMBER" | tee -a $GITHUB_ENV
 
     - name: Compile binary and deploy
       run: go build -o rotakey main/main.go
