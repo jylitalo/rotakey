@@ -9,7 +9,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
-	gopkg.in/ini.v1 v1.66.2
+	gopkg.in/ini.v1 v1.66.3
 )
 
 require (
