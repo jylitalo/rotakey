@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.15.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	golang.org/x/sys v0.0.0-20220307203707-22a9840ba4d7
 	gopkg.in/ini.v1 v1.66.4
 )
