@@ -3,7 +3,7 @@ module github.com/jylitalo/rotakey
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.16.8
+	github.com/aws/aws-sdk-go-v2 v1.16.9
 	github.com/aws/aws-sdk-go-v2/config v1.15.15
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.10
 	github.com/sirupsen/logrus v1.9.0
