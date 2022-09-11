@@ -14,7 +14,7 @@ func (client *awsConfigMock) accessKeyID() (string, error) {
 	return awsConfigMockAccessKey, nil
 }
 
-func (client *awsConfigMock) newIam() awsIamIface {
+func (client *awsConfigMock) newIam() awsIam {
 	return &awsIamMock{
 		failCreateAccessKey: &client.failCreateAccessKey,
 	}

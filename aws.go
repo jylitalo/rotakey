@@ -10,7 +10,7 @@ import (
 
 type AwsConfigIface interface {
 	accessKeyID() (string, error)
-	newIam() awsIamIface
+	newIam() awsIam
 }
 
 type awsConfig struct {
@@ -29,6 +29,6 @@ func (client *awsConfig) accessKeyID() (string, error) {
 	return creds.AccessKeyID, err
 }
 
-func (client *awsConfig) newIam() awsIamIface {
-	return &awsIam{sdk: iam.NewFromConfig(client.config)}
+func (client *awsConfig) newIam() awsIam {
+	return &awsIamImpl{sdk: iam.NewFromConfig(client.config)}
 }
