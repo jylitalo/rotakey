@@ -12,7 +12,7 @@ import (
 type NewCmdInput struct {
 	Use          string
 	NewExec      func() rotakey.ExecIface
-	NewAwsConfig func() (rotakey.AwsConfigIface, error)
+	NewAwsConfig func() (rotakey.AwsConfig, error)
 	NewDotAws    func() (rotakey.DotAws, error)
 }
 

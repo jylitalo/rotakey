@@ -22,7 +22,7 @@ func TestExecute(t *testing.T) {
 	}
 }
 
-func newAwsConfigMockWithOneFailure() (AwsConfigIface, error) {
+func newAwsConfigMockWithOneFailure() (AwsConfig, error) {
 	mock := &awsConfigMock{}
 	mock.failCreateAccessKey = 1
 	return mock, nil

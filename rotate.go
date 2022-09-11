@@ -10,7 +10,7 @@ import (
 )
 
 type ExecuteInput struct {
-	NewAwsConfig func() (AwsConfigIface, error)
+	NewAwsConfig func() (AwsConfig, error)
 	NewDotAws    func() (DotAws, error)
 }
 
@@ -24,7 +24,7 @@ func NewExec() ExecIface {
 	return Exec{}
 }
 
-func robustCreateAccessKey(awsCfg AwsConfigIface) (*types.AccessKey, error) {
+func robustCreateAccessKey(awsCfg AwsConfig) (*types.AccessKey, error) {
 	var err error
 	for attempt := 1; attempt < 5; attempt++ {
 		var newKeys *types.AccessKey

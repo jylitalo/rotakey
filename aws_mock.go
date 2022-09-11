@@ -6,7 +6,7 @@ type awsConfigMock struct {
 	failCreateAccessKey int
 }
 
-func newAwsConfigMock() (AwsConfigIface, error) {
+func newAwsConfigMock() (AwsConfig, error) {
 	return &awsConfigMock{}, nil
 }
 

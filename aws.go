@@ -8,27 +8,27 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
-type AwsConfigIface interface {
+type AwsConfig interface {
 	accessKeyID() (string, error)
 	newIam() awsIam
 }
 
-type awsConfig struct {
+type awsConfigImpl struct {
 	config aws.Config
 }
 
-func newAwsConfig() (AwsConfigIface, error) {
+func newAwsConfig() (AwsConfig, error) {
 	var err error
-	cfg := &awsConfig{}
+	cfg := &awsConfigImpl{}
 	cfg.config, err = config.LoadDefaultConfig(context.TODO())
 	return cfg, err
 }
 
-func (cf *awsConfig) accessKeyID() (string, error) {
+func (cf *awsConfigImpl) accessKeyID() (string, error) {
 	creds, err := cf.config.Credentials.Retrieve(context.TODO())
 	return creds.AccessKeyID, err
 }
 
-func (cf *awsConfig) newIam() awsIam {
+func (cf *awsConfigImpl) newIam() awsIam {
 	return &awsIamImpl{sdk: iam.NewFromConfig(cf.config)}
 }
