@@ -6,6 +6,6 @@ func NewMockExec() ExecIface {
 	return MockExec{}
 }
 
-func (client MockExec) Execute(params ExecuteInput) error {
+func (me MockExec) Execute(params ExecuteInput) error {
 	return nil
 }
