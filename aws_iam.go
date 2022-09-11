@@ -17,8 +17,8 @@ type awsIamImpl struct {
 	sdk *iam.Client
 }
 
-func (client *awsIamImpl) createAccessKey() (*types.AccessKey, error) {
-	resp, err := client.sdk.CreateAccessKey(context.TODO(), &iam.CreateAccessKeyInput{})
+func (ia *awsIamImpl) createAccessKey() (*types.AccessKey, error) {
+	resp, err := ia.sdk.CreateAccessKey(context.TODO(), &iam.CreateAccessKeyInput{})
 	switch {
 	case err == nil:
 		return resp.AccessKey, nil
@@ -32,8 +32,8 @@ func (client *awsIamImpl) createAccessKey() (*types.AccessKey, error) {
 	}
 }
 
-func (client *awsIamImpl) deleteAccessKey(accessKeyId string) error {
-	_, err := client.sdk.DeleteAccessKey(context.TODO(), &iam.DeleteAccessKeyInput{AccessKeyId: &accessKeyId})
+func (ia *awsIamImpl) deleteAccessKey(accessKeyId string) error {
+	_, err := ia.sdk.DeleteAccessKey(context.TODO(), &iam.DeleteAccessKeyInput{AccessKeyId: &accessKeyId})
 	switch {
 	case err == nil:
 		return err

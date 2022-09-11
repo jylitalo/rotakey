@@ -24,11 +24,11 @@ func newAwsConfig() (AwsConfigIface, error) {
 	return cfg, err
 }
 
-func (client *awsConfig) accessKeyID() (string, error) {
-	creds, err := client.config.Credentials.Retrieve(context.TODO())
+func (cf *awsConfig) accessKeyID() (string, error) {
+	creds, err := cf.config.Credentials.Retrieve(context.TODO())
 	return creds.AccessKeyID, err
 }
 
-func (client *awsConfig) newIam() awsIam {
-	return &awsIamImpl{sdk: iam.NewFromConfig(client.config)}
+func (cf *awsConfig) newIam() awsIam {
+	return &awsIamImpl{sdk: iam.NewFromConfig(cf.config)}
 }

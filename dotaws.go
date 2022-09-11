@@ -50,8 +50,8 @@ func newDotAws() (DotAwsIface, error) {
 	}
 }
 
-func (client dotAws) getProfile(accessKeyId string) (*ini.Section, error) {
-	for _, profile := range client.iniFile.Sections() {
+func (da dotAws) getProfile(accessKeyId string) (*ini.Section, error) {
+	for _, profile := range da.iniFile.Sections() {
 		id, err := profile.GetKey("aws_access_key_id")
 		if err == nil && id.String() == accessKeyId {
 			log.Infof("Found %s from %v profile", accessKeyId, profile.Name())
@@ -64,12 +64,12 @@ func (client dotAws) getProfile(accessKeyId string) (*ini.Section, error) {
 	return nil, fmt.Errorf("no profile with %s access key id", accessKeyId)
 }
 
-func (client dotAws) save(profile *ini.Section, accessKey types.AccessKey) error {
+func (da dotAws) save(profile *ini.Section, accessKey types.AccessKey) error {
 	profile.Key("aws_access_key_id").SetValue(*accessKey.AccessKeyId)
 	profile.Key("aws_secret_access_key").SetValue(*accessKey.SecretAccessKey)
-	if err := client.iniFile.SaveTo(client.filename); err != nil {
-		return fmt.Errorf("failed to save %s due to %v", client.filename, err.Error())
+	if err := da.iniFile.SaveTo(da.filename); err != nil {
+		return fmt.Errorf("failed to save %s due to %v", da.filename, err.Error())
 	}
-	log.Debug("Updated config saved into " + client.filename)
+	log.Debug("Updated config saved into " + da.filename)
 	return nil
 }

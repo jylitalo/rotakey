@@ -12,7 +12,7 @@ func newDotAwsMock() (DotAwsIface, error) {
 	return dotAwsMock{}, nil
 }
 
-func (client dotAwsMock) getProfile(accessKeyId string) (*ini.Section, error) {
+func (da dotAwsMock) getProfile(accessKeyId string) (*ini.Section, error) {
 	accessKeyID := "AKIABCDEFGHIJKLKMNOZ"
 	secretAccessKey := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMZ"
 	file := ini.Empty()
@@ -22,6 +22,6 @@ func (client dotAwsMock) getProfile(accessKeyId string) (*ini.Section, error) {
 	return section, CoalesceError(errA, errB, errC)
 }
 
-func (client dotAwsMock) save(profile *ini.Section, accessKey types.AccessKey) error {
+func (da dotAwsMock) save(profile *ini.Section, accessKey types.AccessKey) error {
 	return nil
 }
