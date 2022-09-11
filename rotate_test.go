@@ -1,7 +1,6 @@
 package rotakey
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -46,7 +45,7 @@ func TestAwsConfigMissing(t *testing.T) {
 }
 
 func newDotAwsMissing() (DotAwsIface, error) {
-	fname, _ := ioutil.TempFile(".", "invalid-*")
+	fname, _ := os.CreateTemp(".", "invalid-*")
 	os.Remove(fname.Name())
 	if fname, err := credentialsFile(fname.Name()); err != nil {
 		return nil, err

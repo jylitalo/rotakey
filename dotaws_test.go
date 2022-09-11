@@ -1,7 +1,6 @@
 package rotakey
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -10,7 +9,7 @@ import (
 )
 
 func TestCredentialsMissing(t *testing.T) {
-	file, _ := ioutil.TempFile(".", "missing-*")
+	file, _ := os.CreateTemp(".", "missing-*")
 	fname := file.Name()
 	os.Remove(fname)
 	_, err := credentialsFile(fname)
