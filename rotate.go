@@ -11,7 +11,7 @@ import (
 
 type ExecuteInput struct {
 	NewAwsConfig func() (AwsConfigIface, error)
-	NewDotAws    func() (DotAwsIface, error)
+	NewDotAws    func() (DotAws, error)
 }
 
 type Exec struct{}

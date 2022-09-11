@@ -13,7 +13,7 @@ type NewCmdInput struct {
 	Use          string
 	NewExec      func() rotakey.ExecIface
 	NewAwsConfig func() (rotakey.AwsConfigIface, error)
-	NewDotAws    func() (rotakey.DotAwsIface, error)
+	NewDotAws    func() (rotakey.DotAws, error)
 }
 
 func NewCmd(params NewCmdInput) *cobra.Command {

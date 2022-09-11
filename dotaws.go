@@ -12,12 +12,12 @@ import (
 	ini "gopkg.in/ini.v1"
 )
 
-type dotAws struct {
+type dotAwsImpl struct {
 	filename string
 	iniFile  *ini.File
 }
 
-type DotAwsIface interface {
+type DotAws interface {
 	getProfile(accessKeyId string) (*ini.Section, error)
 	save(profile *ini.Section, accessKey types.AccessKey) error
 }
@@ -40,17 +40,17 @@ func credentialsFile(fname string) (string, error) {
 	return fname, err
 }
 
-func newDotAws() (DotAwsIface, error) {
+func newDotAws() (DotAws, error) {
 	if fname, err := credentialsFile(config.DefaultSharedCredentialsFilename()); err != nil {
 		return nil, err
 	} else if iniFile, err := ini.Load(fname); err != nil {
 		return nil, err
 	} else {
-		return dotAws{filename: fname, iniFile: iniFile}, nil
+		return dotAwsImpl{filename: fname, iniFile: iniFile}, nil
 	}
 }
 
-func (da dotAws) getProfile(accessKeyId string) (*ini.Section, error) {
+func (da dotAwsImpl) getProfile(accessKeyId string) (*ini.Section, error) {
 	for _, profile := range da.iniFile.Sections() {
 		id, err := profile.GetKey("aws_access_key_id")
 		if err == nil && id.String() == accessKeyId {
@@ -64,7 +64,7 @@ func (da dotAws) getProfile(accessKeyId string) (*ini.Section, error) {
 	return nil, fmt.Errorf("no profile with %s access key id", accessKeyId)
 }
 
-func (da dotAws) save(profile *ini.Section, accessKey types.AccessKey) error {
+func (da dotAwsImpl) save(profile *ini.Section, accessKey types.AccessKey) error {
 	profile.Key("aws_access_key_id").SetValue(*accessKey.AccessKeyId)
 	profile.Key("aws_secret_access_key").SetValue(*accessKey.SecretAccessKey)
 	if err := da.iniFile.SaveTo(da.filename); err != nil {

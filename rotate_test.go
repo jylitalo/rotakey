@@ -44,7 +44,7 @@ func TestAwsConfigMissing(t *testing.T) {
 	}
 }
 
-func newDotAwsMissing() (DotAwsIface, error) {
+func newDotAwsMissing() (DotAws, error) {
 	fname, _ := os.CreateTemp(".", "invalid-*")
 	os.Remove(fname.Name())
 	if fname, err := credentialsFile(fname.Name()); err != nil {
@@ -52,7 +52,7 @@ func newDotAwsMissing() (DotAwsIface, error) {
 	} else if iniFile, err := ini.Load(fname); err != nil {
 		return nil, err
 	} else {
-		return dotAws{filename: fname, iniFile: iniFile}, nil
+		return dotAwsImpl{filename: fname, iniFile: iniFile}, nil
 	}
 }
 func TestDotAwsMissing(t *testing.T) {

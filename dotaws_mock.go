@@ -8,7 +8,7 @@ import (
 
 type dotAwsMock struct{}
 
-func newDotAwsMock() (DotAwsIface, error) {
+func newDotAwsMock() (DotAws, error) {
 	return dotAwsMock{}, nil
 }
 
