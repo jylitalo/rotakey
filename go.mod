@@ -3,7 +3,7 @@ module github.com/jylitalo/rotakey
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.16.12
+	github.com/aws/aws-sdk-go-v2 v1.16.15
 	github.com/aws/aws-sdk-go-v2/config v1.17.3
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.15
 	github.com/sirupsen/logrus v1.9.0
@@ -22,7 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.19 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.15 // indirect
-	github.com/aws/smithy-go v1.13.0 // indirect
+	github.com/aws/smithy-go v1.13.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 )
