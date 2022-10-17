@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.17.3
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.15
 	github.com/sirupsen/logrus v1.9.0
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.0
 	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
 	gopkg.in/ini.v1 v1.67.0
 )
@@ -23,6 +23,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.15 // indirect
 	github.com/aws/smithy-go v1.13.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 )
