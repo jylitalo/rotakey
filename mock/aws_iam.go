@@ -1,4 +1,4 @@
-package rotakey
+package mock
 
 import (
 	"fmt"
@@ -7,31 +7,32 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-type awsIamMock struct {
-	failCreateAccessKey *int
+type AwsIam struct {
+	AwsAccessKeyId      string
+	FailCreateAccessKey int
 }
 
-func (ia *awsIamMock) createAccessKey() (*types.AccessKey, error) {
-	accessKeyId := awsConfigMockAccessKey
+func (ia *AwsIam) CreateAccessKey() (*types.AccessKey, error) {
+	accessKeyId := ia.AwsAccessKeyId
 	if len(accessKeyId) < 2 {
 		return nil, fmt.Errorf("AccessKey (%s) is too short", accessKeyId)
 	}
 	if strings.HasSuffix(accessKeyId, "CreateERR") {
 		return nil, fmt.Errorf("error condition triggered")
 	}
-	if *ia.failCreateAccessKey > 0 {
-		*ia.failCreateAccessKey--
+	if ia.FailCreateAccessKey > 0 {
+		ia.FailCreateAccessKey--
 		return nil, fmt.Errorf("InvalidClientTokenId at CreateAccessKey: The security token included in the request is invalid")
 	}
-	accessKeyId = accessKeyId[:len(accessKeyId)-2] + "Z"
+	ia.AwsAccessKeyId = accessKeyId[:len(accessKeyId)-2] + "Z"
 	secretAccessKey := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN"
-	awsConfigMockAccessKey = accessKeyId
+	awsConfigAccessKey = accessKeyId
 	return &types.AccessKey{
 		AccessKeyId:     &accessKeyId,
 		SecretAccessKey: &secretAccessKey,
 	}, nil
 }
 
-func (client *awsIamMock) deleteAccessKey(accessKeyId string) error {
+func (ia *AwsIam) DeleteAccessKey(accessKeyId string) error {
 	return nil
 }

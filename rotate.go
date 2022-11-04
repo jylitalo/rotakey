@@ -5,31 +5,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/jylitalo/rotakey/internal"
+	"github.com/jylitalo/rotakey/types"
 )
 
-type ExecuteInput struct {
-	NewAwsConfig func() (AwsConfig, error)
-	NewDotAws    func() (DotAws, error)
-}
+type Rotate struct{}
 
-type Exec struct{}
-
-type ExecIface interface {
-	Execute(ExecuteInput) error
-}
-
-func NewExec() ExecIface {
-	return Exec{}
-}
-
-func robustCreateAccessKey(awsCfg AwsConfig) (*types.AccessKey, error) {
+func robustCreateAccessKey(awsCfg types.AwsConfig) (*iamtypes.AccessKey, error) {
 	var err error
+	iam := awsCfg.NewIam()
 	for attempt := 1; attempt < 5; attempt++ {
-		var newKeys *types.AccessKey
-		iam := awsCfg.newIam()
-		newKeys, err = iam.createAccessKey()
+		var newKeys *iamtypes.AccessKey
+		newKeys, err = iam.CreateAccessKey()
 		switch {
 		case err == nil:
 			return newKeys, nil
@@ -55,37 +45,30 @@ func robustCreateAccessKey(awsCfg AwsConfig) (*types.AccessKey, error) {
 // - InvalidClientTokenId at CreateAccessKey: The security token (%s) included in the request is invalid
 // - InvalidClientTokenId at DeleteAccessKey: The security token (%s) included in the request is invalid
 // - LimitExceeded: Cannot exceed quota for AccessKeysPerUser: %d
-func (client Exec) Execute(params ExecuteInput) error {
+func (client Rotate) Execute(awsCfg types.AwsConfig, fileCfg types.DotAws) error {
 	// setup
-	if params.NewAwsConfig == nil {
-		params.NewAwsConfig = newAwsConfig
+	_ = awsCfg.LoadDefaultConfig()
+	idAtStart, errA := awsCfg.AccessKeyID()
+	_ = fileCfg.Load()
+	profile, errB := fileCfg.GetProfile(idAtStart)
+	if err := internal.CoalesceError(errA, errB); err != nil {
+		return fmt.Errorf("checking access key and profile failed due to %s", err.Error())
 	}
-	if params.NewDotAws == nil {
-		params.NewDotAws = newDotAws
-	}
-	awsCfg, errA := params.NewAwsConfig()
-	fileCfg, errB := params.NewDotAws()
-	if err := CoalesceError(errA, errB); err != nil {
-		return fmt.Errorf("constructors in execute failed due to %s", err.Error())
-	}
-	idAtStart, errA := awsCfg.accessKeyID()
-	profile, errB := fileCfg.getProfile(idAtStart)
 	if profile != nil {
 		log.Debugf("Found access key (%s) from %s profile", idAtStart, profile.Name())
-	}
-	if err := CoalesceError(errA, errB); err != nil {
-		return fmt.Errorf("checking access key and profile failed due to %s", err.Error())
 	}
 	newKeys, err := robustCreateAccessKey(awsCfg)
 	if err != nil {
 		return err
 	}
-	errA = fileCfg.save(profile, *newKeys) // verify
-	newAwsCfg, errB := params.NewAwsConfig()
-	if err := CoalesceError(errA, errB); err != nil {
-		return fmt.Errorf("changes in execute failed due to %s", err.Error())
+	log.Info("Going for save")
+	if err = fileCfg.Save(profile, *newKeys); err != nil {
+		return err
 	}
-	updatedID, err := newAwsCfg.accessKeyID()
+	log.Info("Going for verify")
+	// verify
+	_ = awsCfg.LoadDefaultConfig()
+	updatedID, err := awsCfg.AccessKeyID()
 	if err != nil {
 		return fmt.Errorf("failed to get new access key (%s) due to %s", *newKeys.AccessKeyId, err.Error())
 	} else if idAtStart == updatedID {
@@ -93,14 +76,5 @@ func (client Exec) Execute(params ExecuteInput) error {
 	}
 	log.Infof("New access key created (id: %s)", *newKeys.AccessKeyId)
 	log.Infof("Deleted old access key (id: %s)", idAtStart)
-	return awsCfg.newIam().deleteAccessKey(idAtStart)
-}
-
-func CoalesceError(errs ...error) error {
-	for _, err := range errs {
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return awsCfg.NewIam().DeleteAccessKey(idAtStart)
 }

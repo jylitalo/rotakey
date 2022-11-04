@@ -3,10 +3,13 @@ package main
 import (
 	"testing"
 
-	"github.com/jylitalo/rotakey"
 	"github.com/jylitalo/rotakey/cmd"
+	"github.com/jylitalo/rotakey/mock"
 )
 
 func TestExecute(t *testing.T) {
-	execute(cmd.NewCmdInput{NewExec: rotakey.NewMockExec})
+	execute(func(opts *cmd.Options) {
+		opts.AwsCfg = &mock.AwsConfig{}
+		opts.FileCfg = &mock.DotAws{}
+	})
 }

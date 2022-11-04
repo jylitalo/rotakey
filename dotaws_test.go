@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jylitalo/rotakey/internal"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,7 +28,7 @@ func TestCredentialsReadMissing(t *testing.T) {
 	_, errA := os.Create(fname)
 	defer os.Remove(fname)
 	errB := os.Chmod(fname, 0222)
-	if err := CoalesceError(errA, errB); err != nil {
+	if err := internal.CoalesceError(errA, errB); err != nil {
 		t.Errorf("File setup failed due to %s", err.Error())
 	}
 	_, err := credentialsFile(fname)
@@ -45,7 +46,7 @@ func TestCredentialsWriteMissing(t *testing.T) {
 	_, errA := os.Create(fname)
 	defer os.Remove(fname)
 	errB := os.Chmod(fname, 0444)
-	if err := CoalesceError(errA, errB); err != nil {
+	if err := internal.CoalesceError(errA, errB); err != nil {
 		t.Errorf("File setup failed due to %s", err.Error())
 	}
 	_, err := credentialsFile(fname)

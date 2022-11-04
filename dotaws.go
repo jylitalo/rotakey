@@ -5,21 +5,19 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"golang.org/x/sys/unix"
-
+	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 	ini "gopkg.in/ini.v1"
 )
 
-type dotAwsImpl struct {
+type DotAws struct {
 	filename string
 	iniFile  *ini.File
 }
 
-type DotAws interface {
-	getProfile(accessKeyId string) (*ini.Section, error)
-	save(profile *ini.Section, accessKey types.AccessKey) error
+type DotAwsOptions struct {
+	filename string
 }
 
 func credentialsFile(fname string) (string, error) {
@@ -40,17 +38,23 @@ func credentialsFile(fname string) (string, error) {
 	return fname, err
 }
 
-func newDotAws() (DotAws, error) {
-	if fname, err := credentialsFile(config.DefaultSharedCredentialsFilename()); err != nil {
-		return nil, err
-	} else if iniFile, err := ini.Load(fname); err != nil {
-		return nil, err
-	} else {
-		return dotAwsImpl{filename: fname, iniFile: iniFile}, nil
+func (da DotAws) Load() error {
+	if da.filename == "" {
+		fname, err := credentialsFile(config.DefaultSharedCredentialsFilename())
+		if err != nil {
+			return err
+		}
+		da.filename = fname
 	}
+	iniFile, err := ini.Load(da.filename)
+	if err != nil {
+		return err
+	}
+	da.iniFile = iniFile
+	return nil
 }
 
-func (da dotAwsImpl) getProfile(accessKeyId string) (*ini.Section, error) {
+func (da DotAws) GetProfile(accessKeyId string) (*ini.Section, error) {
 	for _, profile := range da.iniFile.Sections() {
 		id, err := profile.GetKey("aws_access_key_id")
 		if err == nil && id.String() == accessKeyId {
@@ -64,7 +68,8 @@ func (da dotAwsImpl) getProfile(accessKeyId string) (*ini.Section, error) {
 	return nil, fmt.Errorf("no profile with %s access key id", accessKeyId)
 }
 
-func (da dotAwsImpl) save(profile *ini.Section, accessKey types.AccessKey) error {
+func (da DotAws) Save(profile *ini.Section, accessKey iamtypes.AccessKey) error {
+	log.Info("REAL.da.Save")
 	profile.Key("aws_access_key_id").SetValue(*accessKey.AccessKeyId)
 	profile.Key("aws_secret_access_key").SetValue(*accessKey.SecretAccessKey)
 	if err := da.iniFile.SaveTo(da.filename); err != nil {
