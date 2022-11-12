@@ -61,7 +61,7 @@ func (client Rotate) Execute(awsCfg types.AwsConfig, fileCfg types.DotAws) error
 	if err != nil {
 		return err
 	}
-	log.Info("Going for save")
+	log.WithField("newAccessKey", *newKeys.AccessKeyId).Info("Going for save")
 	if err = fileCfg.Save(profile, *newKeys); err != nil {
 		return err
 	}

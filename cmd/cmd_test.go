@@ -7,9 +7,7 @@ import (
 )
 
 func TestNoFlags(t *testing.T) {
-	NewCmd(func(o *Options) {
-		o.Rotate = &mock.Rotate{}
-	}).Execute()
+	NewCmd(func(o *Options) { o.Rotate = &mock.Rotate{} }).Execute()
 }
 
 func TestDebugFlag(t *testing.T) {

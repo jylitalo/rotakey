@@ -16,10 +16,6 @@ type DotAws struct {
 	iniFile  *ini.File
 }
 
-type DotAwsOptions struct {
-	filename string
-}
-
 func credentialsFile(fname string) (string, error) {
 	_, err := os.Stat(fname)
 	switch {
@@ -55,6 +51,9 @@ func (da DotAws) Load() error {
 }
 
 func (da DotAws) GetProfile(accessKeyId string) (*ini.Section, error) {
+	if da.iniFile == nil {
+		return nil, fmt.Errorf("no aws credentials file loaded")
+	}
 	for _, profile := range da.iniFile.Sections() {
 		id, err := profile.GetKey("aws_access_key_id")
 		if err == nil && id.String() == accessKeyId {

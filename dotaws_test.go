@@ -45,6 +45,7 @@ func TestCredentialsWriteMissing(t *testing.T) {
 	fname := "TestCredentialsWriteMissing"
 	_, errA := os.Create(fname)
 	defer os.Remove(fname)
+
 	errB := os.Chmod(fname, 0444)
 	if err := internal.CoalesceError(errA, errB); err != nil {
 		t.Errorf("File setup failed due to %s", err.Error())
