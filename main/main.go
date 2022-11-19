@@ -8,16 +8,16 @@ import (
 	"github.com/jylitalo/rotakey/cmd"
 )
 
-func execute(params cmd.NewCmdInput) error {
+func execute(opts ...func(*cmd.Options)) error {
 	log.SetFormatter(&log.TextFormatter{
 		DisableLevelTruncation: true,
 		DisableTimestamp:       true,
 	})
-	return cmd.NewCmd(params).Execute()
+	return cmd.NewCmd(opts...).Execute()
 }
 
 func main() {
-	if err := execute(cmd.NewCmdInput{}); err == nil {
+	if err := execute(); err == nil {
 		os.Exit(0)
 	}
 	os.Exit(1)

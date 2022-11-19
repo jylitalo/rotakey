@@ -4,7 +4,9 @@ import (
 	"os"
 	"testing"
 
-	ini "gopkg.in/ini.v1"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/jylitalo/rotakey/mock"
 )
 
 // Scenarios:
@@ -15,57 +17,47 @@ import (
 // - create access key failed because user already has two key pairs
 
 func TestExecute(t *testing.T) {
-	awsConfigMockAccessKey = "AKIABCDEFGHIJKLKMNOP"
-	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMock, NewDotAws: newDotAwsMock})
+	rot := &Rotate{}
+	err := rot.Execute(&mock.AwsConfig{AwsAccessKeyId: mock.DefaultAccessKey}, &mock.DotAws{})
 	if err != nil {
 		t.Errorf("Execute failed due to %v", err)
 	}
 }
 
-func newAwsConfigMockWithOneFailure() (AwsConfig, error) {
-	mock := &awsConfigMock{}
-	mock.failCreateAccessKey = 1
-	return mock, nil
-}
-
 func TestExecuteWithOneFailure(t *testing.T) {
-	awsConfigMockAccessKey = "AKIABCDEFGHIJKLKMNOP"
-	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMockWithOneFailure, NewDotAws: newDotAwsMock})
+	rot := &Rotate{}
+	err := rot.Execute(
+		&mock.AwsConfig{AwsAccessKeyId: mock.DefaultAccessKey, FailCreateAccessKey: 1}, &mock.DotAws{})
 	if err != nil {
 		t.Errorf("ExecuteWithOneFailure failed due to %v", err)
 	}
 }
 
 func TestAwsConfigMissing(t *testing.T) {
-	awsConfigMockAccessKey = ""
-	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMock, NewDotAws: newDotAws})
+
+	rot := &Rotate{}
+	err := rot.Execute(&mock.AwsConfig{}, &mock.DotAws{})
 	if err == nil {
 		t.Errorf("Execute did't abort due to err")
 	}
+	log.Info(err)
 }
 
-func newDotAwsMissing() (DotAws, error) {
-	fname, _ := os.CreateTemp(".", "invalid-*")
-	os.Remove(fname.Name())
-	if fname, err := credentialsFile(fname.Name()); err != nil {
-		return nil, err
-	} else if iniFile, err := ini.Load(fname); err != nil {
-		return nil, err
-	} else {
-		return dotAwsImpl{filename: fname, iniFile: iniFile}, nil
-	}
-}
 func TestDotAwsMissing(t *testing.T) {
-	awsConfigMockAccessKey = "AKIABCDEFGHIJKLKMNOP"
-	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMock, NewDotAws: newDotAwsMissing})
+	tmpFile, _ := os.CreateTemp(".", "invalid-*")
+	os.Remove(tmpFile.Name())
+	dot := DotAws{filename: tmpFile.Name()}
+
+	rot := &Rotate{}
+	err := rot.Execute(&mock.AwsConfig{AwsAccessKeyId: mock.DefaultAccessKey}, dot)
 	if err == nil {
 		t.Errorf("Execute did't abort due to err")
 	}
 }
 
 func TestCreateAccesskeyError(t *testing.T) {
-	awsConfigMockAccessKey = "AKIABCDEFGHCreateERR"
-	err := NewExec().Execute(ExecuteInput{NewAwsConfig: newAwsConfigMock, NewDotAws: newDotAws})
+	rot := &Rotate{}
+	err := rot.Execute(&mock.AwsConfig{AwsAccessKeyId: "AKIABCDEFGHCreateERR"}, &mock.DotAws{})
 	if err == nil {
 		t.Errorf("Execute did't abort due to err")
 	}
