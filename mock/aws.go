@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,13 +15,13 @@ type AwsConfig struct {
 	FailCreateAccessKey int
 }
 
-func (cf *AwsConfig) AccessKeyID() (string, error) { return cf.AwsAccessKeyId, nil }
-func (cf *AwsConfig) NewIam() types.AwsIam         { return cf }
-func (cf *AwsConfig) LoadDefaultConfig() error     { return nil }
+func (cf *AwsConfig) AccessKeyID(ctx context.Context) (string, error) { return cf.AwsAccessKeyId, nil }
+func (cf *AwsConfig) NewIam() types.AwsIam                            { return cf }
+func (cf *AwsConfig) LoadDefaultConfig(ctx context.Context) error     { return nil }
 
 // IAM part
 
-func (cf *AwsConfig) CreateAccessKey() (*iamtypes.AccessKey, error) {
+func (cf *AwsConfig) CreateAccessKey(ctx context.Context) (*iamtypes.AccessKey, error) {
 	accessKeyId := cf.AwsAccessKeyId
 	if len(accessKeyId) < 2 {
 		return nil, fmt.Errorf("AccessKey (%s) is too short", accessKeyId)
@@ -40,4 +41,4 @@ func (cf *AwsConfig) CreateAccessKey() (*iamtypes.AccessKey, error) {
 	}, nil
 }
 
-func (cf *AwsConfig) DeleteAccessKey(accessKeyId string) error { return nil }
+func (cf *AwsConfig) DeleteAccessKey(ctx context.Context, accessKeyId string) error { return nil }
