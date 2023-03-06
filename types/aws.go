@@ -1,7 +1,9 @@
 package types
 
+import "context"
+
 type AwsConfig interface {
-	AccessKeyID() (string, error)
-	LoadDefaultConfig() error
+	AccessKeyID(ctx context.Context) (string, error)
+	LoadDefaultConfig(ctx context.Context) error
 	NewIam() AwsIam
 }

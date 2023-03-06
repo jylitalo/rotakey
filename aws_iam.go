@@ -6,15 +6,15 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
 type awsIam struct {
 	sdk *iam.Client
 }
 
-func (ia *awsIam) CreateAccessKey() (*types.AccessKey, error) {
-	resp, err := ia.sdk.CreateAccessKey(context.TODO(), &iam.CreateAccessKeyInput{})
+func (ia *awsIam) CreateAccessKey(ctx context.Context) (*iamtypes.AccessKey, error) {
+	resp, err := ia.sdk.CreateAccessKey(ctx, &iam.CreateAccessKeyInput{})
 	if err == nil {
 		return resp.AccessKey, nil
 	}
@@ -29,8 +29,8 @@ func (ia *awsIam) CreateAccessKey() (*types.AccessKey, error) {
 	return nil, fmt.Errorf("failed to create access key due to %s", txt)
 }
 
-func (ia *awsIam) DeleteAccessKey(accessKeyId string) error {
-	_, err := ia.sdk.DeleteAccessKey(context.TODO(), &iam.DeleteAccessKeyInput{AccessKeyId: &accessKeyId})
+func (ia *awsIam) DeleteAccessKey(ctx context.Context, accessKeyId string) error {
+	_, err := ia.sdk.DeleteAccessKey(ctx, &iam.DeleteAccessKeyInput{AccessKeyId: &accessKeyId})
 	switch {
 	case err == nil:
 		return err

@@ -68,7 +68,6 @@ func (da DotAws) GetProfile(accessKeyId string) (*ini.Section, error) {
 }
 
 func (da DotAws) Save(profile *ini.Section, accessKey iamtypes.AccessKey) error {
-	log.Info("REAL.da.Save")
 	profile.Key("aws_access_key_id").SetValue(*accessKey.AccessKeyId)
 	profile.Key("aws_secret_access_key").SetValue(*accessKey.SecretAccessKey)
 	if err := da.iniFile.SaveTo(da.filename); err != nil {

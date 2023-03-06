@@ -1,6 +1,7 @@
 package rotakey
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -14,12 +15,12 @@ import (
 
 type Rotate struct{}
 
-func robustCreateAccessKey(awsCfg types.AwsConfig) (*iamtypes.AccessKey, error) {
+func robustCreateAccessKey(ctx context.Context, awsCfg types.AwsConfig) (*iamtypes.AccessKey, error) {
 	var err error
 	iam := awsCfg.NewIam()
 	for attempt := 1; attempt < 5; attempt++ {
 		var newKeys *iamtypes.AccessKey
-		newKeys, err = iam.CreateAccessKey()
+		newKeys, err = iam.CreateAccessKey(ctx)
 		switch {
 		case err == nil:
 			return newKeys, nil
@@ -47,8 +48,9 @@ func robustCreateAccessKey(awsCfg types.AwsConfig) (*iamtypes.AccessKey, error) 
 // - LimitExceeded: Cannot exceed quota for AccessKeysPerUser: %d
 func (client Rotate) Execute(awsCfg types.AwsConfig, fileCfg types.DotAws) error {
 	// setup
-	_ = awsCfg.LoadDefaultConfig()
-	idAtStart, errA := awsCfg.AccessKeyID()
+	ctx := context.Background()
+	_ = awsCfg.LoadDefaultConfig(ctx)
+	idAtStart, errA := awsCfg.AccessKeyID(ctx)
 	_ = fileCfg.Load()
 	profile, errB := fileCfg.GetProfile(idAtStart)
 	if err := internal.CoalesceError(errA, errB); err != nil {
@@ -57,7 +59,7 @@ func (client Rotate) Execute(awsCfg types.AwsConfig, fileCfg types.DotAws) error
 	if profile != nil {
 		log.Debugf("Found access key (%s) from %s profile", idAtStart, profile.Name())
 	}
-	newKeys, err := robustCreateAccessKey(awsCfg)
+	newKeys, err := robustCreateAccessKey(ctx, awsCfg)
 	if err != nil {
 		return err
 	}
@@ -67,8 +69,8 @@ func (client Rotate) Execute(awsCfg types.AwsConfig, fileCfg types.DotAws) error
 	}
 	log.Info("Going for verify")
 	// verify
-	_ = awsCfg.LoadDefaultConfig()
-	updatedID, err := awsCfg.AccessKeyID()
+	_ = awsCfg.LoadDefaultConfig(ctx)
+	updatedID, err := awsCfg.AccessKeyID(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get new access key (%s) due to %s", *newKeys.AccessKeyId, err.Error())
 	} else if idAtStart == updatedID {
@@ -76,5 +78,5 @@ func (client Rotate) Execute(awsCfg types.AwsConfig, fileCfg types.DotAws) error
 	}
 	log.Infof("New access key created (id: %s)", *newKeys.AccessKeyId)
 	log.Infof("Deleted old access key (id: %s)", idAtStart)
-	return awsCfg.NewIam().DeleteAccessKey(idAtStart)
+	return awsCfg.NewIam().DeleteAccessKey(ctx, idAtStart)
 }

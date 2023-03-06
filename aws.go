@@ -7,20 +7,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 
-	"github.com/jylitalo/rotakey/types"
+	awstypes "github.com/jylitalo/rotakey/types"
 )
 
 type AwsConfig struct {
 	config aws.Config
 }
 
-func (cf *AwsConfig) AccessKeyID() (string, error) {
-	creds, err := cf.config.Credentials.Retrieve(context.TODO())
+func (cf *AwsConfig) AccessKeyID(ctx context.Context) (string, error) {
+	creds, err := cf.config.Credentials.Retrieve(ctx)
 	return creds.AccessKeyID, err
 }
 
-func (cf *AwsConfig) LoadDefaultConfig() error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+func (cf *AwsConfig) LoadDefaultConfig(ctx context.Context) error {
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return err
 	}
@@ -28,6 +28,6 @@ func (cf *AwsConfig) LoadDefaultConfig() error {
 	return nil
 }
 
-func (cf *AwsConfig) NewIam() types.AwsIam {
+func (cf *AwsConfig) NewIam() awstypes.AwsIam {
 	return &awsIam{sdk: iam.NewFromConfig(cf.config)}
 }
